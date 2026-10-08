@@ -8,6 +8,21 @@ Mémoire de projet de fin d’études consacré à une application de bureau pou
 - [Rapport (Word)](Raaport.docx)
 - [Présentation](Presentation%20LV_finaaaal%20.pptx)
 
+## Statut et contenu du dépôt
+
+Ce dépôt archive les livrables académiques, la documentation de conception et un export de la base de données du projet. Le code source de l’application WPF n’est pas actuellement versionné : aucun fichier `.sln`, `.csproj`, `.cs` ou `.xaml` n’est présent. L’application ne peut donc pas être compilée ou exécutée à partir de ce dépôt seul.
+
+| Élément | Contenu |
+| --- | --- |
+| `final_Raaport.pdf` | Version PDF du rapport final |
+| `Raaport.docx` | Version modifiable du rapport |
+| `Presentation LV_finaaaal .pptx` | Support de présentation |
+| `jalal-PFE.sql` | Schéma MySQL 8.0 et données de démonstration |
+| `Structure De l'App/` | Notes sur la base, les fenêtres et l’organisation prévue |
+| `Raaport_fichiers/` | Images et ressources intégrées au rapport |
+
+> **Sécurité :** `jalal-PFE.sql` contient des comptes et mots de passe d’exemple en clair. Ce fichier est destiné uniquement à une démonstration locale. Ne l’importez pas dans un environnement de production et remplacez toutes les données d’identification avant tout usage réel.
+
 ---
 
 ![](Raaport_fichiers/image001.jpg)
