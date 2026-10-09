@@ -23,6 +23,23 @@ Ce dépôt archive les livrables académiques, la documentation de conception et
 
 > **Sécurité :** `jalal-PFE.sql` contient des comptes et mots de passe d’exemple en clair. Ce fichier est destiné uniquement à une démonstration locale. Ne l’importez pas dans un environnement de production et remplacez toutes les données d’identification avant tout usage réel.
 
+## Importer la base de démonstration
+
+Le dump ne crée pas la base de données. Créez-la d’abord avec MySQL 8.0, puis importez le fichier :
+
+```sh
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS location_voiture CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
+mysql -u root -p location_voiture < jalal-PFE.sql
+```
+
+Pour vérifier l’import :
+
+```sh
+mysql -u root -p -D location_voiture -e "SHOW TABLES;"
+```
+
+L’import supprime et recrée les cinq tables incluses (`clients`, `employees`, `paiements`, `reservations` et `voitures`). Utilisez donc une base locale dédiée et sauvegardez toute donnée existante avant de relancer le script.
+
 ---
 
 ![](Raaport_fichiers/image001.jpg)
