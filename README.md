@@ -40,6 +40,20 @@ mysql -u root -p -D location_voiture -e "SHOW TABLES;"
 
 L’import supprime et recrée les cinq tables incluses (`clients`, `employees`, `paiements`, `reservations` et `voitures`). Utilisez donc une base locale dédiée et sauvegardez toute donnée existante avant de relancer le script.
 
+## Schéma de données
+
+| Table | Clé primaire | Rôle | Règles présentes dans le dump |
+| --- | --- | --- | --- |
+| `clients` | `id` | Identité, coordonnées et permis des clients | Client majeur (`cage >= 18`) et unicité du nom d’utilisateur, de l’e-mail, de la CIN, du permis et du passeport |
+| `employees` | `eid` | Employés, fonction et droits administrateur | CIN et e-mail uniques |
+| `voitures` | `vid` | Parc automobile, tarification, disponibilité et maintenance | Matricule unique |
+| `reservations` | `rid` | Dates, lieux, prix et durée des locations | Durée positive et prix non négatif |
+| `paiements` | `pid` | Montant, date, situation et méthode de paiement | Montant non négatif |
+
+Les colonnes `reservations.cid` et `reservations.vid` représentent respectivement le client et le véhicule d’une réservation. Les colonnes `reservations.pid`, `paiements.rid` et `clients.rid` représentent également des associations prévues par l’application.
+
+> **Intégrité référentielle :** le dump ne déclare actuellement aucune clé étrangère. MySQL ne vérifiera donc pas automatiquement que ces identifiants correspondent à des lignes existantes. Validez les relations avant toute migration ou utilisation au-delà de la démonstration locale.
+
 ---
 
 ![](Raaport_fichiers/image001.jpg)
