@@ -54,6 +54,45 @@ Les colonnes `reservations.cid` et `reservations.vid` représentent respectiveme
 
 > **Intégrité référentielle :** le dump ne déclare actuellement aucune clé étrangère. MySQL ne vérifiera donc pas automatiquement que ces identifiants correspondent à des lignes existantes. Validez les relations avant toute migration ou utilisation au-delà de la démonstration locale.
 
+### Vérifier l’intégrité après import
+
+Comme les associations ne sont pas contraintes, ces requêtes permettent de repérer les références orphelines sans modifier les données :
+
+```sql
+-- Réservations sans client existant
+SELECT r.rid, r.cid
+FROM reservations AS r
+LEFT JOIN clients AS c ON c.id = r.cid
+WHERE r.cid IS NOT NULL AND c.id IS NULL;
+
+-- Réservations sans véhicule existant
+SELECT r.rid, r.vid
+FROM reservations AS r
+LEFT JOIN voitures AS v ON v.vid = r.vid
+WHERE r.vid IS NOT NULL AND v.vid IS NULL;
+
+-- Paiements liés à une réservation inexistante
+SELECT p.pid, p.rid
+FROM paiements AS p
+LEFT JOIN reservations AS r ON r.rid = p.rid
+WHERE p.rid IS NOT NULL AND r.rid IS NULL;
+
+-- Réservations liées à un paiement inexistant
+SELECT r.rid, r.pid
+FROM reservations AS r
+LEFT JOIN paiements AS p ON p.pid = r.pid
+WHERE r.pid IS NOT NULL AND p.pid IS NULL;
+
+-- Dates ou durées incohérentes
+SELECT rid, rdatedepart, rdateretour, rduree
+FROM reservations
+WHERE rdateretour < rdatedepart
+   OR rduree <> DATEDIFF(rdateretour, rdatedepart);
+```
+
+Chaque requête devrait retourner zéro ligne avant d’ajouter des clés étrangères ou de réutiliser ces données. Dans l’export actuel, les références `paiements.rid` et `reservations.pid` contiennent des identifiants absents des tables correspondantes ; il faut donc déterminer la relation attendue et réconcilier ces valeurs avant une migration.
+
+
 ---
 
 ![](Raaport_fichiers/image001.jpg)
