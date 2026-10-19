@@ -93,6 +93,27 @@ WHERE rdateretour < rdatedepart
 Chaque requête devrait retourner zéro ligne avant d’ajouter des clés étrangères ou de réutiliser ces données. Dans l’export actuel, les références `paiements.rid` et `reservations.pid` contiennent des identifiants absents des tables correspondantes ; il faut donc déterminer la relation attendue et réconcilier ces valeurs avant une migration.
 
 
+### Repérer les réservations incomplètes
+
+Les colonnes métier du dump sont largement déclarées `DEFAULT NULL`. Les contraintes existantes ne garantissent donc pas, à elles seules, la présence d'un âge client, d'un montant ou d'une durée. De même, les requêtes précédentes ignorent les références `NULL` et les comparaisons de dates ne signalent pas les dates absentes.
+
+Pour une revue métier avant migration, cette requête retourne uniquement les identifiants des réservations dont les champs essentiels sont absents :
+
+```sql
+SELECT rid
+FROM reservations
+WHERE cid IS NULL
+   OR vid IS NULL
+   OR rdatedepart IS NULL
+   OR rdateretour IS NULL
+   OR rduree IS NULL
+   OR rprix IS NULL;
+```
+
+Une ligne signalée n'est pas nécessairement une erreur SQL : elle nécessite une décision métier (brouillon autorisé ou réservation à compléter). Ne remplacez pas automatiquement les valeurs manquantes par zéro et ne rendez pas les colonnes obligatoires avant d'avoir défini cette règle et réconcilié les données.
+
+
+
 ---
 
 ![](Raaport_fichiers/image001.jpg)
