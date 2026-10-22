@@ -40,6 +40,19 @@ mysql -u root -p -D location_voiture -e "SHOW TABLES;"
 
 L’import supprime et recrée les cinq tables incluses (`clients`, `employees`, `paiements`, `reservations` et `voitures`). Utilisez donc une base locale dédiée et sauvegardez toute donnée existante avant de relancer le script.
 
+
+## Limites de sécurité avant réutilisation
+
+Le dump est un jeu de démonstration, pas une base prête pour la production. Avant de connecter une application réelle :
+
+- supprimez ou anonymisez les lignes d'exemple contenant noms, adresses, numéros d'identité, coordonnées et chemins de fichiers locaux ;
+- remplacez les colonnes `clients.password` et `employees.password` par des empreintes produites côté application avec un algorithme adapté aux mots de passe, tel qu'Argon2id, bcrypt ou PBKDF2 ; ne stockez jamais le mot de passe brut ou un simple hash généraliste ;
+- créez un compte MySQL dédié avec uniquement les permissions nécessaires, au lieu d'utiliser `root` depuis l'application ;
+- placez la chaîne de connexion et les secrets hors du dépôt, puis prévoyez rotation des secrets, sauvegardes protégées et contrôle d'accès aux données personnelles ;
+- ajoutez les clés étrangères et règles de suppression seulement après avoir corrigé les références orphelines signalées ci-dessous.
+
+Les identifiants présents dans `jalal-PFE.sql` sont publics dans l'historique Git : ils ne doivent être réutilisés dans aucun autre environnement.
+
 ## Schéma de données
 
 | Table | Clé primaire | Rôle | Règles présentes dans le dump |
