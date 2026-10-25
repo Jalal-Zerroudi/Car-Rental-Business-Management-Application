@@ -40,6 +40,30 @@ mysql -u root -p -D location_voiture -e "SHOW TABLES;"
 
 L’import supprime et recrée les cinq tables incluses (`clients`, `employees`, `paiements`, `reservations` et `voitures`). Utilisez donc une base locale dédiée et sauvegardez toute donnée existante avant de relancer le script.
 
+## Sauvegarder et restaurer la base
+
+Avant de réimporter `jalal-PFE.sql` dans une base déjà utilisée, créez une sauvegarde cohérente :
+
+```sh
+mysqldump --single-transaction --routines --triggers   -u root -p location_voiture > location_voiture_backup.sql
+```
+
+Conservez ce fichier hors du dépôt : il peut contenir des données personnelles et des identifiants. Vérifiez qu’il n’est pas vide avant de poursuivre, puis testez idéalement la restauration dans une base temporaire :
+
+```sh
+mysql -u root -p -e "CREATE DATABASE location_voiture_restore_test CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
+mysql -u root -p location_voiture_restore_test < location_voiture_backup.sql
+mysql -u root -p -D location_voiture_restore_test -e "SHOW TABLES;"
+```
+
+Pour restaurer la base principale après un incident, arrêtez d’abord l’application afin d’éviter de nouvelles écritures, puis importez la sauvegarde validée :
+
+```sh
+mysql -u root -p location_voiture < location_voiture_backup.sql
+```
+
+La sauvegarde protège l’état antérieur, mais ne corrige pas les références orphelines déjà présentes. Exécutez ensuite les contrôles d’intégrité décrits plus bas.
+
 
 ## Limites de sécurité avant réutilisation
 
