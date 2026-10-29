@@ -23,6 +23,19 @@ Ce dépôt archive les livrables académiques, la documentation de conception et
 
 > **Sécurité :** `jalal-PFE.sql` contient des comptes et mots de passe d’exemple en clair. Ce fichier est destiné uniquement à une démonstration locale. Ne l’importez pas dans un environnement de production et remplacez toutes les données d’identification avant tout usage réel.
 
+## Notes de conception
+
+Le dossier `Structure De l'App/` contient des notes préparatoires, et non les fichiers source de l'application :
+
+| Document | Contenu | Portée |
+| --- | --- | --- |
+| [`BD.txt`](<Structure De l'App/BD.txt>) | Modèle conceptuel initial des voitures, clients, réservations, paiements, agences et employés | Les noms de tables et colonnes diffèrent du dump actuel ; consultez la section [Schéma de données](#schéma-de-données) pour `jalal-PFE.sql` |
+| [`Résumé des fonctionnalités pour chaque fenêtre.txt`](<Structure De l'App/Résumé des fonctionnalités pour chaque fenêtre.txt>) | Synthèse des menus et responsabilités employé/administrateur | Description fonctionnelle prévue |
+| [`Structure.txt`](<Structure De l'App/Structure.txt>) | Arborescence WPF/MVVM envisagée | Les fichiers `.cs` et `.xaml` listés ne sont pas présents dans ce dépôt |
+| [`Windows.txt`](<Structure De l'App/Windows.txt>) | Détail des écrans, actions, notifications et rapports | Cahier d'idées, pas une preuve d'implémentation |
+
+Ces documents servent à comprendre la conception historique. Pour l'état réellement versionné, fiez-vous à l'inventaire de la section [Statut et contenu du dépôt](#statut-et-contenu-du-dépôt).
+
 ## Importer la base de démonstration
 
 Le dump ne crée pas la base de données. Créez-la d’abord avec MySQL 8.0, puis importez le fichier :
