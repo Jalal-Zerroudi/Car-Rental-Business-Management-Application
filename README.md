@@ -23,6 +23,32 @@ Ce dépôt archive les livrables académiques, la documentation de conception et
 
 > **Sécurité :** `jalal-PFE.sql` contient des comptes et mots de passe d’exemple en clair. Ce fichier est destiné uniquement à une démonstration locale. Ne l’importez pas dans un environnement de production et remplacez toutes les données d’identification avant tout usage réel.
 
+## Reconstituer un livrable exécutable
+
+L'export SQL et les documents de conception ne suffisent pas à reconstruire l'application. Pour
+rendre le projet reproductible, les éléments suivants doivent être récupérés depuis l'environnement
+de développement d'origine ou recréés explicitement :
+
+1. **Solution .NET** — ajouter le fichier `.sln`, les projets `.csproj`, les sources C# et les
+   vues XAML, en conservant leur arborescence relative.
+2. **Dépendances figées** — documenter le SDK .NET 8 exact et versionner les références NuGet,
+   notamment le connecteur MySQL et les bibliothèques utilisées par les rapports ou graphiques.
+3. **Configuration sans secret** — fournir un fichier d'exemple tel que
+   `appsettings.example.json`; la chaîne de connexion et les mots de passe réels doivent rester
+   hors de Git.
+4. **Source de vérité de la base** — choisir entre des migrations versionnées et
+   `jalal-PFE.sql`. Si des migrations sont ajoutées, expliquer comment initialiser une base vide
+   et comment migrer les données historiques.
+5. **Données et médias portables** — remplacer les chemins absolus locaux par des chemins relatifs
+   et fournir uniquement un petit jeu de démonstration anonymisé.
+6. **Validation minimale** — ajouter une commande de restauration des dépendances, une commande de
+   compilation et un test de démarrage vérifiant au moins la connexion à une base locale dédiée.
+
+Le projet pourra être annoncé comme reproductible lorsque, depuis un clone neuf, une personne
+pourra restaurer les dépendances, créer la base, compiler la solution et ouvrir l'écran de
+connexion en suivant uniquement les instructions du dépôt. D'ici là, les captures du rapport
+décrivent le résultat historique mais ne remplacent pas les sources manquantes.
+
 ## Notes de conception
 
 Le dossier `Structure De l'App/` contient des notes préparatoires, et non les fichiers source de l'application :
