@@ -2,6 +2,17 @@
 
 Mémoire de projet de fin d’études consacré à une application de bureau pour la gestion d’une agence de location de voitures.
 
+## Navigation rapide
+
+- [Livrables](#livrables)
+- [État réellement versionné](#statut-et-contenu-du-dépôt)
+- [Éléments nécessaires pour reconstruire l’application](#reconstituer-un-livrable-exécutable)
+- [Notes de conception](#notes-de-conception)
+- [Import de la base de démonstration](#importer-la-base-de-démonstration)
+- [Sauvegarde et restauration](#sauvegarder-et-restaurer-la-base)
+- [Précautions de sécurité](#limites-de-sécurité-avant-réutilisation)
+- [Schéma et contrôles d’intégrité](#schéma-de-données)
+
 ## Livrables
 
 - [Rapport final (PDF)](final_Raaport.pdf)
