@@ -12,6 +12,7 @@ Mémoire de projet de fin d’études consacré à une application de bureau pou
 - [Sauvegarde et restauration](#sauvegarder-et-restaurer-la-base)
 - [Précautions de sécurité](#limites-de-sécurité-avant-réutilisation)
 - [Schéma et contrôles d’intégrité](#schéma-de-données)
+- [Audit des valeurs catégorielles](#auditer-les-valeurs-catégorielles)
 
 ## Livrables
 
@@ -198,6 +199,32 @@ WHERE cid IS NULL
 ```
 
 Une ligne signalée n'est pas nécessairement une erreur SQL : elle nécessite une décision métier (brouillon autorisé ou réservation à compléter). Ne remplacez pas automatiquement les valeurs manquantes par zéro et ne rendez pas les colonnes obligatoires avant d'avoir défini cette règle et réconcilié les données.
+
+## Auditer les valeurs catégorielles
+
+Plusieurs états métier sont stockés dans des colonnes `varchar` sans contrainte de domaine. Avant une migration, inventoriez les valeurs réellement présentes avec des requêtes en lecture seule :
+
+```sql
+SELECT vdisponibilite, COUNT(*) AS occurrences
+FROM voitures
+GROUP BY vdisponibilite;
+
+SELECT vassurence, vmaintenance, COUNT(*) AS occurrences
+FROM voitures
+GROUP BY vassurence, vmaintenance;
+
+SELECT psituation, pmethode, COUNT(*) AS occurrences
+FROM paiements
+GROUP BY psituation, pmethode;
+
+SELECT cgender, COUNT(*) AS occurrences
+FROM clients
+GROUP BY cgender;
+```
+
+L'export actuel mélange notamment `Yes`, `No` et `NON` dans `voitures.vdisponibilite`, ainsi que `Paid` et `Payé` dans `paiements.psituation`. Une comparaison littérale ou un filtre d'interface peut donc omettre des lignes pourtant équivalentes.
+
+Définissez d'abord un vocabulaire canonique et une table de correspondance validée par le métier. Normalisez ensuite les données dans une copie de test, vérifiez les comptages avant/après, puis seulement ajoutez des contraintes `CHECK` ou remplacez ces textes par des codes de référence. Ne fusionnez pas automatiquement des valeurs dont le sens métier n'a pas été confirmé.
 
 
 
