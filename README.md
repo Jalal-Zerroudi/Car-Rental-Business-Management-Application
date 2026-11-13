@@ -89,6 +89,25 @@ Pour vérifier l’import :
 mysql -u root -p -D location_voiture -e "SHOW TABLES;"
 ```
 
+Vérifiez ensuite que les données de démonstration ont toutes été chargées :
+
+```sql
+SELECT 'clients' AS table_name, COUNT(*) AS row_count FROM clients
+UNION ALL
+SELECT 'employees', COUNT(*) FROM employees
+UNION ALL
+SELECT 'paiements', COUNT(*) FROM paiements
+UNION ALL
+SELECT 'reservations', COUNT(*) FROM reservations
+UNION ALL
+SELECT 'voitures', COUNT(*) FROM voitures;
+```
+
+L'export versionné contient actuellement 6 clients, 14 employés, 10 paiements,
+6 réservations et 6 voitures. Un résultat inférieur signale un import incomplet ;
+consultez alors la première erreur MySQL affichée pendant l'import avant de
+relancer le script dans une base locale vide.
+
 L’import supprime et recrée les cinq tables incluses (`clients`, `employees`, `paiements`, `reservations` et `voitures`). Utilisez donc une base locale dédiée et sauvegardez toute donnée existante avant de relancer le script.
 
 ## Sauvegarder et restaurer la base
