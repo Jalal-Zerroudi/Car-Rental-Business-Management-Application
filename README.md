@@ -13,6 +13,7 @@ Mémoire de projet de fin d’études consacré à une application de bureau pou
 - [Précautions de sécurité](#limites-de-sécurité-avant-réutilisation)
 - [Schéma et contrôles d’intégrité](#schéma-de-données)
 - [Audit des valeurs catégorielles](#auditer-les-valeurs-catégorielles)
+- [Concurrence des réservations](#prévenir-les-doubles-réservations)
 
 ## Livrables
 
@@ -218,6 +219,45 @@ WHERE cid IS NULL
 ```
 
 Une ligne signalée n'est pas nécessairement une erreur SQL : elle nécessite une décision métier (brouillon autorisé ou réservation à compléter). Ne remplacez pas automatiquement les valeurs manquantes par zéro et ne rendez pas les colonnes obligatoires avant d'avoir défini cette règle et réconcilié les données.
+
+## Prévenir les doubles réservations
+
+Le champ `voitures.vdisponibilite` ne suffit pas pour décider qu'un véhicule est réservable : l'export ne contient aucune contrainte empêchant deux réservations qui se chevauchent pour le même `vid`. Cette règle doit être appliquée par le service qui recréera l'application ; elle n'est pas implémentée dans le dump fourni.
+
+Adoptez des intervalles semi-ouverts `[départ, retour)` : deux réservations se chevauchent lorsque la réservation existante commence avant le nouveau retour **et** se termine après le nouveau départ. Cette convention autorise un nouveau départ exactement à l'heure ou à la date du retour précédent. Rejetez d'abord les références ou dates `NULL`, ainsi que tout intervalle dont le retour n'est pas strictement postérieur au départ.
+
+La vérification et l'insertion doivent appartenir à la même transaction. Verrouiller la ligne du véhicule sérialise les tentatives concurrentes, y compris lorsqu'aucune réservation existante ne peut encore être verrouillée :
+
+```sql
+START TRANSACTION;
+
+SELECT vid
+FROM voitures
+WHERE vid = :vid
+FOR UPDATE;
+
+SELECT rid
+FROM reservations
+WHERE vid = :vid
+  AND rdatedepart < :nouveau_retour
+  AND rdateretour > :nouveau_depart
+LIMIT 1;
+
+-- Si la requête précédente retourne une ligne : ROLLBACK et signaler le conflit.
+-- Sinon, insérer la réservation avec les mêmes paramètres validés, puis :
+COMMIT;
+```
+
+Vérifiez aussi que le premier `SELECT` retourne bien le véhicule ; une référence absente doit provoquer un `ROLLBACK`. Ne calculez ni ne mettez à jour `vdisponibilite` hors de cette transaction. Si cette colonne reste dans le futur schéma, traitez-la comme un état dérivé ou administratif, pas comme la preuve unique de disponibilité.
+
+Après réconciliation des références orphelines et des valeurs incomplètes décrites plus haut, cet index accélère la recherche de chevauchement sans garantir à lui seul l'absence de conflit :
+
+```sql
+CREATE INDEX idx_reservations_vid_periode
+    ON reservations (vid, rdatedepart, rdateretour);
+```
+
+Validez cette règle avec un test d'intégration utilisant deux connexions réelles : lancez simultanément deux transactions sur le même véhicule et la même période, puis vérifiez qu'une seule insertion est validée. Ajoutez aussi les cas limites « retour = nouveau départ », période inversée, véhicule absent et annulation après erreur. Un test unitaire séquentiel ne reproduit pas la course que le verrou doit empêcher.
 
 ## Auditer les valeurs catégorielles
 
