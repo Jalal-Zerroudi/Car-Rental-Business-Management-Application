@@ -9,6 +9,7 @@ Mémoire de projet de fin d’études consacré à une application de bureau pou
 - [Éléments nécessaires pour reconstruire l’application](#reconstituer-un-livrable-exécutable)
 - [Notes de conception](#notes-de-conception)
 - [Import de la base de démonstration](#importer-la-base-de-démonstration)
+- [Compatibilité MySQL](#vérifier-la-compatibilité-mysql)
 - [Sauvegarde et restauration](#sauvegarder-et-restaurer-la-base)
 - [Précautions de sécurité](#limites-de-sécurité-avant-réutilisation)
 - [Schéma et contrôles d’intégrité](#schéma-de-données)
@@ -110,6 +111,34 @@ consultez alors la première erreur MySQL affichée pendant l'import avant de
 relancer le script dans une base locale vide.
 
 L’import supprime et recrée les cinq tables incluses (`clients`, `employees`, `paiements`, `reservations` et `voitures`). Utilisez donc une base locale dédiée et sauvegardez toute donnée existante avant de relancer le script.
+
+## Vérifier la compatibilité MySQL
+
+Le dump cible MySQL 8.0 : il utilise le moteur InnoDB, la collation
+`utf8mb4_0900_ai_ci` et des contraintes `CHECK`. Avant l'import, contrôlez le
+serveur réellement appelé par le client `mysql` :
+
+```sh
+mysql --version
+mysql -u root -p -e "SELECT VERSION() AS version, @@character_set_server AS charset, @@collation_server AS collation, @@sql_mode AS sql_mode;"
+```
+
+Une erreur `Unknown collation: 'utf8mb4_0900_ai_ci'` indique que le serveur
+ciblé n'est pas compatible avec la collation du dump. N'effectuez pas un
+remplacement global de la collation sans tester les tris, comparaisons et
+contraintes dans une base temporaire.
+
+Après l'import, confirmez que MySQL a conservé les règles attendues :
+
+```sh
+mysql -u root -p -D location_voiture -e "SHOW CREATE TABLE clients\G"
+mysql -u root -p -D location_voiture -e "SHOW CREATE TABLE reservations\G"
+```
+
+La première sortie doit notamment contenir `clients_chk_1` et la seconde
+`reservations_chk_1` et `reservations_chk_2`. La présence de ces définitions
+ne remplace pas les contrôles d'intégrité relationnelle plus bas, car le dump ne
+déclare aucune clé étrangère.
 
 ## Sauvegarder et restaurer la base
 
