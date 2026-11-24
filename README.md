@@ -12,6 +12,7 @@ Mémoire de projet de fin d’études consacré à une application de bureau pou
 - [Compatibilité MySQL](#vérifier-la-compatibilité-mysql)
 - [Sauvegarde et restauration](#sauvegarder-et-restaurer-la-base)
 - [Précautions de sécurité](#limites-de-sécurité-avant-réutilisation)
+- [Médias référencés par la base](#médias-référencés-par-la-base)
 - [Schéma et contrôles d’intégrité](#schéma-de-données)
 - [Audit des valeurs catégorielles](#auditer-les-valeurs-catégorielles)
 - [Concurrence des réservations](#prévenir-les-doubles-réservations)
@@ -176,6 +177,32 @@ Le dump est un jeu de démonstration, pas une base prête pour la production. Av
 - ajoutez les clés étrangères et règles de suppression seulement après avoir corrigé les références orphelines signalées ci-dessous.
 
 Les identifiants présents dans `jalal-PFE.sql` sont publics dans l'historique Git : ils ne doivent être réutilisés dans aucun autre environnement.
+
+## Médias référencés par la base
+
+Le dump enregistre uniquement des **chemins de fichiers**, pas le contenu des images ou documents. Les colonnes `clients.PhotoPathe`, `clients.Permispathe`, `clients.CINpathe`, `employees.ImagePath` et `voitures.vphotoPath` contiennent notamment des chemins absolus Windows (`C:\\Data-Location\\...`), des chemins Unix d’exemple et des valeurs `path_to_...`. Les médias opérationnels correspondants ne sont pas versionnés ; les images de `Raaport_fichiers/` sont des ressources du rapport et ne constituent pas une sauvegarde de ces pièces.
+
+Après l’import, cette requête en lecture seule dresse l’inventaire des références à traiter :
+
+```sql
+SELECT 'clients.PhotoPathe' AS source, id AS record_id, PhotoPathe AS file_path
+FROM clients WHERE NULLIF(TRIM(PhotoPathe), '') IS NOT NULL
+UNION ALL
+SELECT 'clients.Permispathe', id, Permispathe
+FROM clients WHERE NULLIF(TRIM(Permispathe), '') IS NOT NULL
+UNION ALL
+SELECT 'clients.CINpathe', id, CINpathe
+FROM clients WHERE NULLIF(TRIM(CINpathe), '') IS NOT NULL
+UNION ALL
+SELECT 'employees.ImagePath', eid, ImagePath
+FROM employees WHERE NULLIF(TRIM(ImagePath), '') IS NOT NULL
+UNION ALL
+SELECT 'voitures.vphotoPath', vid, vphotoPath
+FROM voitures WHERE NULLIF(TRIM(vphotoPath), '') IS NOT NULL
+ORDER BY source, record_id;
+```
+
+Un import SQL réussi ne rend donc pas ces médias disponibles. Lors de la reconstruction, choisissez un stockage explicite, conservez en base un identifiant ou un chemin relatif portable, et affichez un média de remplacement lorsque le fichier manque. Ne publiez pas de CIN, permis, passeports ou photos réels dans Git : migrez-les vers un stockage privé avec contrôle d’accès, chiffrement et politique de conservation.
 
 ## Schéma de données
 
